@@ -1,7 +1,10 @@
 import path from 'path';
 import sqlite3 from "sqlite3";
 
-export class Thumbnails {
+/**
+ * Model of the pdf_thumbnails table
+ */
+export class PdfThumbnails {
     private dbFullpath : string
 
     constructor (dbPath = process.env.DB_PATH) {
@@ -13,7 +16,7 @@ export class Thumbnails {
         this.dbFullpath = targetPath;
     }
 
-    setup() {
+    async setup() : Promise<void> {
         return this.run(
             `
             CREATE TABLE IF NOT EXISTS pdf_thumbnails (
@@ -46,7 +49,6 @@ export class Thumbnails {
     }
 
     async exists(url: string) : Promise<boolean> {
-        let exists = false;
         const rows = await this.get(
             `
             SELECT 1
@@ -58,6 +60,12 @@ export class Thumbnails {
         return rows.length > 0;
     }
 
+    //
+    // These preivate functions abstract fetching the database and closing it when
+    // executing a command.
+    // For convenience, they expose a promise interface (even though sqlite3 remains
+    // synchonous).
+    //
     private db() : sqlite3.Database {
         return new sqlite3.Database(this.dbFullpath, (err: Error | null) => {
             if (err) {
