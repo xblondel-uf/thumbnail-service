@@ -1,6 +1,12 @@
 import path from 'path';
 import sqlite3 from "sqlite3";
 
+export interface Thumbnail {
+    id: number;
+    url: string;
+    thumbnail: string;
+}
+
 /**
  * Model of the pdf_thumbnails table
  */
@@ -38,9 +44,9 @@ export class PdfThumbnails {
         )
     }
 
-    async fetch(from: number = 0, size: number = 0) : Promise<any[]> {
+    async fetch(from: number = 0, size: number = 0) : Promise<Thumbnail[]> {
         let rows: any[] = [];
-        const row = await this.all(
+        const row: Thumbnail[] = await this.all(
         `
             SELECT id, url, thumbnail FROM pdf_thumbnails
         `
