@@ -45,8 +45,7 @@ export class PdfThumbnails {
     }
 
     async fetch(from: number = 0, size: number = 0) : Promise<Thumbnail[]> {
-        let rows: any[] = [];
-        const row: Thumbnail[] = await this.all(
+        const rows: Thumbnail[] = await this.all(
         `
             SELECT id, url, thumbnail FROM pdf_thumbnails
         `
@@ -67,7 +66,7 @@ export class PdfThumbnails {
     }
 
     //
-    // These preivate functions abstract fetching the database and closing it when
+    // These private functions abstract fetching the database and closing it when
     // executing a command.
     // For convenience, they expose a promise interface (even though sqlite3 remains
     // synchonous).
