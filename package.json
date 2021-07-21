@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "nodemon src/index.ts"
+    "start": "nodemon src/index.ts",
+    "test": "npx jest --runInBand --detectOpenHandles --colors --verbose --reporters=default --coverage"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
@@ -22,7 +23,9 @@
     "@types/pdf-thumbnail": "^1.0.1",
     "@types/sqlite3": "^3.1.7",
     "jest": "^27.0.6",
+    "jest-junit": "^12.2.0",
     "nodemon": "^2.0.12",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "ts-jest": "^27.0.3"
   }
 }
