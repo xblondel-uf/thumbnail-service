@@ -27,7 +27,9 @@ app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 })
 
-app.post('/pdf/upload', async (req: any, res: any) => {
+const router = express.Router();
+
+router.post('/pdf/upload', async (req: any, res: any) => {
     const url = req.body.url;
 
     processUrl(url, db)
@@ -41,8 +43,11 @@ app.post('/pdf/upload', async (req: any, res: any) => {
     res.status(200).json({});
 });
 
-app.get('/pdf/thumbnails', async (req: any, res: any) => {
+router.get('/pdf/thumbnails', async (req: any, res: any) => {
     const data = await db.fetch();
 
     return res.status(200).json(data);
-})
+});
+
+app.use('/1', router);
+
