@@ -11,15 +11,27 @@ export interface Thumbnail {
  * Model of the pdf_thumbnails table
  */
 export class PdfThumbnails {
-    private dbFullpath : string
+    private db: sqlite3.Database;
 
     constructor (dbPath = process.env.DB_PATH) {
         if (!dbPath) {
             throw new Error("No path provided and DB_PATH not set");
         }
-        const rootPath = `${path.dirname(__filename)}/../..`;
-        const targetPath = path.normalize(`${rootPath}/${dbPath}`);
-        this.dbFullpath = targetPath;
+        const actualPath = this.normalizePath(dbPath);
+        this.db = new sqlite3.Database(actualPath, (err: Error | null) => {
+            if (err) {
+                throw err;
+            }
+        });
+    }
+
+    private normalizePath(dbPath: string) {
+        let targetPath = dbPath;
+        if (targetPath !== ':memory:') {
+            const rootPath = `${path.dirname(__filename)}/../..`;
+            targetPath = path.normalize(`${rootPath}/${dbPath}`);
+        }
+        return targetPath;
     }
 
     async setup() : Promise<void> {
@@ -71,19 +83,9 @@ export class PdfThumbnails {
     // For convenience, they expose a promise interface (even though sqlite3 remains
     // synchonous).
     //
-    private db() : sqlite3.Database {
-        return new sqlite3.Database(this.dbFullpath, (err: Error | null) => {
-            if (err) {
-                throw err;
-            }
-        });
-
-    }
     private async get(sql: string, params: any[] = []) : Promise<any[]> {
         return new Promise((resolve, reject) => {
-            const db = this.db();
-            db.get(sql, params, (err, data) => {
-                db.close();
+            this.db.get(sql, params, (err, data) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -95,9 +97,7 @@ export class PdfThumbnails {
 
     private async all(sql: string, params: any[] = []) : Promise<any[]> {
         return new Promise((resolve, reject) => {
-            const db = this.db();
-            db.all(sql, params, (err, data) => {
-                db.close();
+            this.db.all(sql, params, (err, data) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -109,9 +109,7 @@ export class PdfThumbnails {
 
     private async run(sql: string, params: any[] = []) : Promise<void> {
         return new Promise((resolve, reject) => {
-            const db = this.db();
-            db.run(sql, params, (err) => {
-                db.close();
+            this.db.run(sql, params, (err) => {
                 if (err) {
                     reject(err);
                 } else {
