@@ -2,9 +2,9 @@ import path from 'path';
 import sqlite3 from "sqlite3";
 
 export interface Thumbnail {
-    id: number;
     url: string;
     thumbnail: string;
+    created: Date;
 }
 
 /**
@@ -38,9 +38,9 @@ export class PdfThumbnails {
         return this.run(
             `
             CREATE TABLE IF NOT EXISTS pdf_thumbnails (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                url TEXT NOT NULL,
-                thumbnail TEXT NOT NULL
+                url TEXT NOT NULL PRIMARY KEY,
+                thumbnail TEXT NOT NULL,
+                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
             `
         );
@@ -59,7 +59,9 @@ export class PdfThumbnails {
     async fetch(from: number = 0, size: number = 0) : Promise<Thumbnail[]> {
         const rows: Thumbnail[] = await this.all(
         `
-            SELECT id, url, thumbnail FROM pdf_thumbnails
+            SELECT url, thumbnail, created
+            FROM pdf_thumbnails
+            ORDER BY created DESC
         `
         );
         return rows;
