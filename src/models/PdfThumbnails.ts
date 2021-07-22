@@ -4,7 +4,7 @@ import sqlite3 from "sqlite3";
 export interface Thumbnail {
     url: string;
     thumbnail: string;
-    created: Date;
+    created: string;
 }
 
 /**
@@ -40,7 +40,7 @@ export class PdfThumbnails {
             CREATE TABLE IF NOT EXISTS pdf_thumbnails (
                 url TEXT NOT NULL PRIMARY KEY,
                 thumbnail TEXT NOT NULL,
-                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                created DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'now'))
             );
             `
         );
