@@ -41,7 +41,7 @@ describe('index', () => {
     }
   });
 
-  it('should upload a document', async () => {
+  it('should upload a document, call the hook and retrieve the document', async () => {
     const url1 = `http://localhost:${PORT}/pdf/sample/1`;
 
     await request(server)
