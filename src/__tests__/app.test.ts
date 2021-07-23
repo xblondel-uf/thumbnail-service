@@ -168,28 +168,27 @@ describe('index', () => {
       .post('/1/pdf/upload/')
       .send({ url: url1, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
-    await sleep(2);
+    await waitFor(2000, () => hookCount === 1);
     await request(server)
       .post('/1/pdf/upload/')
       .send({ url: url2, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
-    await sleep(2);
+    await waitFor(2000, () => hookCount === 2);
     await request(server)
       .post('/1/pdf/upload/')
       .send({ url: url3, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
-    await sleep(2);
+    await waitFor(2000, () => hookCount === 3);
     await request(server)
       .post('/1/pdf/upload/')
       .send({ url: url4, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
-    await sleep(2);
+    await waitFor(2000, () => hookCount === 4);
     await request(server)
       .post('/1/pdf/upload/')
       .send({ url: url5, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
-
-    await waitFor(2000, () => hookCount == 5);
+    await waitFor(2000, () => hookCount === 5);
 
     // no pagination
     await request(server)
@@ -198,6 +197,36 @@ describe('index', () => {
       .then((res) => {
         expect(res.body.length).toBe(5);
         const expected = [url5, url4, url3, url2, url1];
+        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        expect(actual).toEqual(expected);
+      });
+
+    // first 3
+    await request(server)
+      .get('/1/pdf/thumbnails')
+      .query({
+        from: 0,
+        size: 3,
+      })
+      .expect(200)
+      .then((res) => {
+        expect(res.body.length).toBe(3);
+        const expected = [url5, url4, url3];
+        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        expect(actual).toEqual(expected);
+      });
+
+    // last 2 (even though we are requesting 3)
+    await request(server)
+      .get('/1/pdf/thumbnails')
+      .query({
+        from: 3,
+        size: 3,
+      })
+      .expect(200)
+      .then((res) => {
+        expect(res.body.length).toBe(2);
+        const expected = [url2, url1];
         const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
         expect(actual).toEqual(expected);
       });

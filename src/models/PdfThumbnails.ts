@@ -64,13 +64,15 @@ export class PdfThumbnails {
   }
 
   async fetch(from: number = 0, size: number = 0): Promise<Thumbnail[]> {
-    const rows: Thumbnail[] = await this.all(
-      `
+    let sql = `
             SELECT url, thumbnail, created
             FROM pdf_thumbnails
             ORDER BY created DESC
-        `
-    );
+        `;
+    if (size > 0) {
+      sql += `LIMIT ${from}, ${size}`;
+    }
+    const rows: Thumbnail[] = await this.all(sql);
     return rows;
   }
 

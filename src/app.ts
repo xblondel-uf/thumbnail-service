@@ -43,7 +43,9 @@ export default async function setup(): Promise<express.Express> {
   });
 
   router.get('/pdf/thumbnails', async (req: any, res: any) => {
-    const data = await db.fetch();
+    const from = parseInt(req.query.from || '0', 10);
+    const size = parseInt(req.query.size || '0', 10);
+    const data = await db.fetch(from, size);
 
     return res.status(200).json(data);
   });
