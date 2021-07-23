@@ -8,7 +8,7 @@ export async function processUrl(
 ): Promise<void> {
   return db.exists(url).then(async (exists) => {
     if (exists) {
-      console.log('Url already exists. Nothing to process.');
+      console.debug('Url already exists. Nothing to process.');
       return;
     } else {
       return fetchPdf(url)

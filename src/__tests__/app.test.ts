@@ -65,7 +65,7 @@ describe('index', () => {
     });
 
     server = app.listen(PORT, () => {
-      console.log(`Test server listening on port ${PORT}`);
+      console.debug(`Test server listening on port ${PORT}`);
     });
   });
 

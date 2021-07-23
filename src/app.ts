@@ -27,7 +27,7 @@ export default async function setup(): Promise<express.Express> {
 
     processUrl(url, db)
       .then(() => {
-        console.log(`Url [${url || '(null)'}] succesfully processed`);
+        console.debug(`Url [${url || '(null)'}] succesfully processed`);
         postHook(hook, url, true);
       })
       .catch((err) => {
