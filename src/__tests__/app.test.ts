@@ -19,8 +19,14 @@ describe('index', () => {
   beforeAll(async () => {
     const app = await setup();
 
-    app.get('/pdf/sample/:id', async (req: any, res: any) => {
-      const file = `${__dirname}/fixture.pdf`;
+    /**
+     * Route that is passed to the service to download the PDF.
+     * :fileName is the name of the PDF file without extension
+     * :id is only used to have different urls for the same file
+     */
+    app.get('/pdf/sample/:id/:fileName', async (req: any, res: any) => {
+      const fileName = req.params.fileName;
+      const file = `${__dirname}/${fileName}.pdf`;
       res.download(file);
     });
 
@@ -42,7 +48,7 @@ describe('index', () => {
   });
 
   it('should upload a document, call the hook and retrieve the document', async () => {
-    const url1 = `http://localhost:${PORT}/pdf/sample/1`;
+    const url1 = `http://localhost:${PORT}/pdf/sample/1/fixture`;
 
     await request(server)
       .post('/1/pdf/upload/')
