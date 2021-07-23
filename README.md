@@ -46,6 +46,12 @@ The two following environment variables are defined in `.env`, and you may updat
 
 ## Commands
 
+After cloning, run the setup command:
+
+```
+npm install
+```
+
 To start the application:
 
 ```
@@ -57,6 +63,8 @@ To run all the tests:
 ```
 npm run test
 ```
+
+_Remark_: The database is created when the application starts for the first time.
 
 ## APIs
 
