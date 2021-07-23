@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import { PdfThumbnails } from './models/PdfThumbnails';
 import { processUrl } from './conversion/processUrl';
+import { postHook } from './webhook/postHook';
 
 export default async function setup(): Promise<express.Express> {
   dotenv.config();
@@ -26,13 +27,16 @@ export default async function setup(): Promise<express.Express> {
 
   router.post('/pdf/upload', async (req: any, res: any) => {
     const url = req.body.url;
+    const hook = req.body.hook;
 
     processUrl(url, db)
       .then(() => {
         console.log(`Url [${url || '(null)'}] succesfully processed`);
+        postHook(hook, url, true);
       })
       .catch((err) => {
         console.error(`Failed to process url [${url || '(null)'}]: ${err}`);
+        postHook(hook, url, false, `${err}`);
       });
 
     res.status(200).json({});
