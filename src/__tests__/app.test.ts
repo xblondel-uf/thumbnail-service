@@ -37,6 +37,9 @@ describe('app', () => {
       }
     });
 
+    /**
+     * Route receving the hook calls.
+     */
     hookData = null;
     hookCount = 0;
     app.post('/hook', async (req: any, res: any) => {
@@ -52,6 +55,7 @@ describe('app', () => {
 
   afterEach(async () => {
     if (server) {
+      // this prevents jest from having open handles.
       await server.close();
     }
   });
