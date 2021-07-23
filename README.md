@@ -108,7 +108,7 @@ Two optional query parameters enable pagination:
 - `from` is the zero-based index to start at. Defaults to `0`.
 - `size` is the maximum number of elements to return. Defaults to `0`, which indicates no limit.
 
-Both parameters can be used independently.
+The `from` parameter can only be used if `size` is not 0 (this is a consequence of sqlite needing a `LIMIT` when using an `OFFSET`).
 
 Example usages:
 
@@ -126,3 +126,7 @@ $ curl "http://localhost:8000/1/pdf/thumbnails?from=3&size=3"
 - The application end-to-end tests (`src/__tests__/app.test.ts`) are rather complex: We add two routes to the application on the fly, one to download the PDF and the other exposing the webhook, and we need to coordinate uploads, hook calls and fetching, which complexify the tests.
 
 - The model tests (`src/models/__tests__/PdfThumbnails.test.ts`) make heavy use of a `sleep` function, to avoid having two insertions in the same millisecond, which ensures a strict order when fetching the data (if two urls are in the same millisecond, we may return one or the other first).
+
+- There is no security, and no sanity checks of the various URLs that are received (download and webhook), which is a disputable practice would the API be exposed to the Internet.
+
+- There is no "production" build and execution: `npm run start` is a development deployemnt.

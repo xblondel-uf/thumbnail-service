@@ -38,6 +38,10 @@ export default async function setup(dbPath: string): Promise<express.Express> {
   router.get('/pdf/thumbnails', async (req: any, res: any) => {
     const from = parseInt(req.query.from || '0', 10);
     const size = parseInt(req.query.size || '0', 10);
+    if (from < 0 || size < 0) {
+      // Unprocessable entity
+      return res.status(422).json({});
+    }
     const data = await db.fetch(from, size);
 
     console.debug(`Returning ${data.length} elements`);
