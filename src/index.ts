@@ -8,3 +8,11 @@ async function run(): Promise<void> {
     console.log(`Listening on port ${PORT}`);
   });
 }
+
+run()
+  .then(() => {
+    console.log('started');
+  })
+  .catch((err) => {
+    console.log(err);
+  });
