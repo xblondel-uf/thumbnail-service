@@ -7,6 +7,8 @@ export interface Thumbnail {
     created: string;
 }
 
+const SQLITE_CONSTRAINT_ERRNO = 19;
+
 /**
  * Model of the pdf_thumbnails table
  */
@@ -53,7 +55,12 @@ export class PdfThumbnails {
             VALUES(?, ?)
             `,
             [url, thumbnail]
-        )
+        ).catch(err => {
+            // we ignore constraint errors (duplicate insertions)
+            if (err.errno !== SQLITE_CONSTRAINT_ERRNO) {
+                throw err;
+            }
+        });
     }
 
     async fetch(from: number = 0, size: number = 0) : Promise<Thumbnail[]> {

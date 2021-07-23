@@ -54,5 +54,20 @@ describe('PdfThumbnails', () => {
         expect(actual[1].thumbnail).toEqual(thumbnail1);
     });
 
+    it('should ignore duplicate insertions', async () => {
+        const target = await getInstance();
+
+        const url1 = 'url1';
+        const thumbnail1 = 'thumbnail1';
+        await target.insert(url1, thumbnail1);
+        // this second insertion should be ignored
+        await target.insert(url1, thumbnail1);
+
+        // we should only fetch a single element
+        const actual = await target.fetch();
+        expect(actual.length).toEqual(1);
+        expect(actual[0].url).toEqual(url1);
+        expect(actual[0].thumbnail).toEqual(thumbnail1);
+    });
 
 });
