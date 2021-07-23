@@ -46,6 +46,12 @@ export class PdfThumbnails {
             created DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'now'))
         );
       `
+    ).then(() =>
+      this.run(
+        `
+      CREATE INDEX pdf_thumbnails_created ON pdf_thumbnails(created);
+      `
+      )
     );
   }
 
