@@ -29,7 +29,7 @@ describe('processUrl', () => {
     const url = 'url1';
 
     const db = new PdfThumbnails(':memory:');
-    await db.setup();
+    db.setup();
 
     fetchPdfMock.mockResolvedValueOnce(Buffer.from(data, 'utf-8'));
     getThumbnailMock.mockImplementationOnce(async (buffer) => {
@@ -52,7 +52,7 @@ describe('processUrl', () => {
     const url = 'url1';
 
     const db = new PdfThumbnails(':memory:');
-    await db.setup();
+    db.setup();
 
     fetchPdfMock.mockResolvedValue(Buffer.from(data, 'utf-8'));
     getThumbnailMock.mockImplementation(async (buffer) => {

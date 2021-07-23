@@ -39,12 +39,12 @@ export class PdfThumbnails {
   async setup(): Promise<void> {
     return this.run(
       `
-            CREATE TABLE IF NOT EXISTS pdf_thumbnails (
-                url TEXT NOT NULL PRIMARY KEY,
-                thumbnail TEXT NOT NULL,
-                created DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'now'))
-            );
-            `
+        CREATE TABLE IF NOT EXISTS pdf_thumbnails (
+            url TEXT NOT NULL PRIMARY KEY,
+            thumbnail TEXT NOT NULL,
+            created DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'now'))
+        );
+      `
     );
   }
 

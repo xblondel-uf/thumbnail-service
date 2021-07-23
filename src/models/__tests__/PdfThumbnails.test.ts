@@ -3,7 +3,7 @@ import { PdfThumbnails, Thumbnail } from '../PdfThumbnails';
 describe('PdfThumbnails', () => {
   async function getInstance() {
     const target = new PdfThumbnails(':memory:');
-    await target.setup();
+    target.setup();
     return target;
   }
 
