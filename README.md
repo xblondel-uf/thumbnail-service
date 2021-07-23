@@ -2,7 +2,10 @@
 
 ## Prerequisites
 
-This service has been developed and tested with node v16.4.2.
+This service has been developed and tested with node v16.4.2. It has been tested on the following platforms:
+
+- Windows 10 + WSL 2
+- macOS Big Sur
 
 To generate the thumbnails, we use the [pdf-thumbnail](https://www.npmjs.com/package/pdf-thumbnail) package, which requires ImageMagick and Ghostscript.
 
