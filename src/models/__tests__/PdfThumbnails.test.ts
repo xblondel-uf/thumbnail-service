@@ -1,25 +1,22 @@
-import { PdfThumbnails, Thumbnail } from '../PdfThumbnails';
+import { PdfThumbnails } from '../PdfThumbnails';
+import { sleep } from '../../utils/utils';
 
 describe('PdfThumbnails', () => {
-  async function getInstance() {
+  async function getModelInstance() {
     const target = new PdfThumbnails(':memory:');
     await target.setup();
     return target;
   }
 
-  async function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   it('should create an empty table', async () => {
-    const target = await getInstance();
+    const target = await getModelInstance();
 
     const actual = await target.fetch();
     expect(actual).toEqual([]);
   });
 
   it('should insert data and fetch it back', async () => {
-    const target = await getInstance();
+    const target = await getModelInstance();
 
     const url1 = 'url1';
     const thumbnail1 = 'thumbnail1';
@@ -35,7 +32,7 @@ describe('PdfThumbnails', () => {
   });
 
   it('should insert data and fetch it back most recent first', async () => {
-    const target = await getInstance();
+    const target = await getModelInstance();
 
     const url1 = 'url1';
     const thumbnail1 = 'thumbnail1';
@@ -58,7 +55,7 @@ describe('PdfThumbnails', () => {
   });
 
   it('should ignore duplicate insertions', async () => {
-    const target = await getInstance();
+    const target = await getModelInstance();
 
     const url1 = 'url1';
     const thumbnail1 = 'thumbnail1';
@@ -74,7 +71,7 @@ describe('PdfThumbnails', () => {
   });
 
   it('should insert data and fetch it back with pagination, most recent first', async () => {
-    const target = await getInstance();
+    const target = await getModelInstance();
 
     const url1 = 'url1';
     const thumbnail1 = 'thumbnail1';

@@ -2,6 +2,13 @@ import { fetchPdf } from './fetchPdf';
 import { getThumbnail } from './getThumbnail';
 import { PdfThumbnails } from '../models/PdfThumbnails';
 
+/**
+ * Process a PDF url: Fetch the PDF, extract the thumbnail and store it to the database.
+ *
+ * @param url - PDF url to process
+ * @param db - Database model
+ * @returns Nothing
+ */
 export async function processUrl(
   url: string,
   db: PdfThumbnails

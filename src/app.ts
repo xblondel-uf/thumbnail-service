@@ -1,19 +1,16 @@
-import * as dotenv from 'dotenv';
 import express from 'express';
 import { PdfThumbnails } from './models/PdfThumbnails';
 import { processUrl } from './conversion/processUrl';
 import { postHook } from './webhook/postHook';
 
-export default async function setup(): Promise<express.Express> {
-  dotenv.config();
-
-  if (!process.env.DB_PATH) {
-    console.error('The DB_PATH environment variable must be defined');
-    process.exit(1);
-  }
-
-  const DB_PATH = process.env.DB_PATH as string;
-  const db = new PdfThumbnails(DB_PATH);
+/**
+ * Create and setup the application.
+ *
+ * @param dbPath - Path of the sqlite database file
+ * @returns Created application
+ */
+export default async function setup(dbPath: string): Promise<express.Express> {
+  const db = new PdfThumbnails(dbPath);
   await db.setup();
 
   const app = express();

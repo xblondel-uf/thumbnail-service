@@ -15,9 +15,14 @@ const SQLITE_CONSTRAINT_ERRNO = 19;
 export class PdfThumbnails {
   private db: sqlite3.Database;
 
-  constructor(dbPath = process.env.DB_PATH) {
+  /**
+   * Constructor
+   *
+   * @param dbPath - Path to the sqlite database
+   */
+  constructor(dbPath: string) {
     if (!dbPath) {
-      throw new Error('No path provided and DB_PATH not set');
+      throw new Error('No path provided');
     }
     const actualPath = this.normalizePath(dbPath);
     this.db = new sqlite3.Database(actualPath, (err: Error | null) => {
@@ -27,15 +32,11 @@ export class PdfThumbnails {
     });
   }
 
-  private normalizePath(dbPath: string) {
-    let targetPath = dbPath;
-    if (targetPath !== ':memory:') {
-      const rootPath = `${path.dirname(__filename)}/../..`;
-      targetPath = path.normalize(`${rootPath}/${dbPath}`);
-    }
-    return targetPath;
-  }
-
+  /**
+   * Setup the database table if it does not exist.
+   *
+   * @returns Nothing
+   */
   async setup(): Promise<void> {
     return this.run(
       `
@@ -48,6 +49,13 @@ export class PdfThumbnails {
     );
   }
 
+  /**
+   * Insert a (url, thumbnail) pair into the database.
+   *
+   * @param url - Url to insert
+   * @param thumbnail - Thumbnail associated to the URL
+   * @returns Nothing
+   */
   async insert(url: string, thumbnail: string): Promise<void> {
     return this.run(
       `
@@ -63,6 +71,13 @@ export class PdfThumbnails {
     });
   }
 
+  /**
+   * Retrieve the data from the database, most recently inserted first.
+   *
+   * @param from - Zero-based index to start at, ignored if size is 0
+   * @param size - Number of elements to retrieve, all if 0
+   * @returns The data stored in the database.
+   */
   async fetch(from: number = 0, size: number = 0): Promise<Thumbnail[]> {
     let sql = `
             SELECT url, thumbnail, created
@@ -76,6 +91,12 @@ export class PdfThumbnails {
     return rows;
   }
 
+  /**
+   * Checks if the url is already in the database.
+   *
+   * @param url - Url to check
+   * @returns - true if the url already is in the database
+   */
   async exists(url: string): Promise<boolean> {
     const rows = await this.get(
       `
@@ -86,6 +107,25 @@ export class PdfThumbnails {
       [url]
     );
     return rows != null;
+  }
+
+  //
+  // Private methods
+  //
+
+  /**
+   * Normalize the path passed as parameter, aligning it to the root path of the directory.
+   *
+   * @param dbPath - Path to normalize
+   * @returns Normalized path
+   */
+  private normalizePath(dbPath: string) {
+    let targetPath = dbPath;
+    if (targetPath !== ':memory:') {
+      const rootPath = `${path.dirname(__filename)}/../..`;
+      targetPath = path.normalize(`${rootPath}/${dbPath}`);
+    }
+    return targetPath;
   }
 
   //

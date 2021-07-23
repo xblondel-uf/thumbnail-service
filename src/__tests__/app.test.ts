@@ -2,40 +2,21 @@ import request from 'supertest';
 import { Server } from 'http';
 import { HookData } from '../webhook/postHook';
 import fs from 'fs/promises';
+import { waitFor } from '../utils/utils';
 
-process.env.DB_PATH = ':memory:';
+const DB_PATH = ':memory:';
 const PORT = 7999;
 
 import setup from '../app';
 import { Thumbnail } from '../models/PdfThumbnails';
-import path from 'path/posix';
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function waitFor(
-  timeout: number,
-  check: { (): boolean }
-): Promise<boolean> {
-  let total = 0;
-  const quantum = 10;
-  let checked = check();
-  while (!checked && total < timeout) {
-    await sleep(quantum);
-    total += quantum;
-    checked = check();
-  }
-  return checked;
-}
-
-describe('index', () => {
+describe('app', () => {
   let server: Server | null = null;
   let hookData: HookData | null = null;
   let hookCount = 0;
 
   beforeEach(async () => {
-    const app = await setup();
+    const app = await setup(DB_PATH);
 
     /**
      * Route that is passed to the service to download the PDF.
