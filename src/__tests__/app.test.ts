@@ -14,6 +14,21 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function waitFor(
+  timeout: number,
+  check: { (): boolean }
+): Promise<boolean> {
+  let total = 0;
+  const quantum = 10;
+  let checked = check();
+  while (!checked && total < timeout) {
+    await sleep(quantum);
+    total += quantum;
+    checked = check();
+  }
+  return checked;
+}
+
 describe('index', () => {
   let server: Server | null = null;
   let hookData: HookData | null = null;
@@ -65,7 +80,7 @@ describe('index', () => {
       .send({ url: url1, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
 
-    await sleep(2000);
+    await waitFor(2000, () => hookData != null);
 
     expect(hookData).not.toBeNull();
     if (hookData != null) {
@@ -93,7 +108,7 @@ describe('index', () => {
       .send({ url: url1, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
 
-    await sleep(2000);
+    await waitFor(2000, () => hookData != null);
 
     expect(hookData).not.toBeNull();
     if (hookData != null) {
@@ -120,7 +135,7 @@ describe('index', () => {
       .send({ url: url1, hook: `http://localhost:${PORT}/hook` })
       .expect(200);
 
-    await sleep(2000);
+    await waitFor(2000, () => hookData != null);
 
     expect(hookData).not.toBeNull();
     if (hookData != null) {
