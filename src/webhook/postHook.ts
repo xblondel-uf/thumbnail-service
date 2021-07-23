@@ -31,5 +31,7 @@ export async function postHook(
     console.error(
       `Calling hook [${hookUrl}] failed with error ${response.statusText}`
     );
+    return;
   }
+  await response.json();
 }

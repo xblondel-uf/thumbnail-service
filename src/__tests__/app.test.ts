@@ -27,6 +27,7 @@ describe('index', () => {
     hookData = null;
     app.post('/hook', async (req: any, res: any) => {
       hookData = req.body;
+      res.status(200).json({});
     });
 
     server = app.listen(PORT, () => {
