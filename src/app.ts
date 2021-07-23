@@ -7,10 +7,6 @@ import { postHook } from './webhook/postHook';
 export default async function setup(): Promise<express.Express> {
   dotenv.config();
 
-  if (!process.env.PORT) {
-    console.error('The PORT environment variable must be defined');
-    process.exit(1);
-  }
   if (!process.env.DB_PATH) {
     console.error('The DB_PATH environment variable must be defined');
     process.exit(1);
@@ -46,6 +42,8 @@ export default async function setup(): Promise<express.Express> {
     const from = parseInt(req.query.from || '0', 10);
     const size = parseInt(req.query.size || '0', 10);
     const data = await db.fetch(from, size);
+
+    console.debug(`Returning ${data.length} elements`);
 
     return res.status(200).json(data);
   });
