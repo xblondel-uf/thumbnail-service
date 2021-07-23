@@ -32,6 +32,7 @@ async function waitFor(
 describe('index', () => {
   let server: Server | null = null;
   let hookData: HookData | null = null;
+  let hookCount = 0;
 
   beforeEach(async () => {
     const app = await setup();
@@ -56,9 +57,11 @@ describe('index', () => {
     });
 
     hookData = null;
+    hookCount = 0;
     app.post('/hook', async (req: any, res: any) => {
       hookData = req.body;
       res.status(200).json({});
+      hookCount += 1;
     });
 
     server = app.listen(PORT, () => {
@@ -149,6 +152,54 @@ describe('index', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.length).toBe(0);
+      });
+  });
+
+  it('should upload multiple documents, and paginate the results', async () => {
+    const url1 = `http://localhost:${PORT}/pdf/sample/1/fixture`;
+    const url2 = `http://localhost:${PORT}/pdf/sample/2/fixture`;
+    const url3 = `http://localhost:${PORT}/pdf/sample/3/fixture`;
+    const url4 = `http://localhost:${PORT}/pdf/sample/4/fixture`;
+    const url5 = `http://localhost:${PORT}/pdf/sample/5/fixture`;
+
+    expect(hookCount).toBe(0);
+
+    await request(server)
+      .post('/1/pdf/upload/')
+      .send({ url: url1, hook: `http://localhost:${PORT}/hook` })
+      .expect(200);
+    await sleep(2);
+    await request(server)
+      .post('/1/pdf/upload/')
+      .send({ url: url2, hook: `http://localhost:${PORT}/hook` })
+      .expect(200);
+    await sleep(2);
+    await request(server)
+      .post('/1/pdf/upload/')
+      .send({ url: url3, hook: `http://localhost:${PORT}/hook` })
+      .expect(200);
+    await sleep(2);
+    await request(server)
+      .post('/1/pdf/upload/')
+      .send({ url: url4, hook: `http://localhost:${PORT}/hook` })
+      .expect(200);
+    await sleep(2);
+    await request(server)
+      .post('/1/pdf/upload/')
+      .send({ url: url5, hook: `http://localhost:${PORT}/hook` })
+      .expect(200);
+
+    await waitFor(2000, () => hookCount == 5);
+
+    // no pagination
+    await request(server)
+      .get('/1/pdf/thumbnails')
+      .expect(200)
+      .then((res) => {
+        expect(res.body.length).toBe(5);
+        const expected = [url5, url4, url3, url2, url1];
+        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        expect(actual).toEqual(expected);
       });
   });
 });
