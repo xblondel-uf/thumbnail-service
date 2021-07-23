@@ -6,6 +6,7 @@ process.env.DB_PATH = ':memory:';
 const PORT = 7999;
 
 import setup from '../app';
+import { Thumbnail } from '../models/PdfThumbnails';
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -61,7 +62,9 @@ describe('index', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.length).toBe(1);
-        expect(res.body[0].url).toBe(url1);
+        const thumbnail: Thumbnail = res.body[0];
+        expect(thumbnail.url).toBe(url1);
+        expect(thumbnail.thumbnail.length).not.toBe(0);
       });
   });
 });
