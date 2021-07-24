@@ -39,6 +39,8 @@ export class PdfThumbnails {
    * @returns Nothing
    */
   async setup(): Promise<void> {
+    // The database is split in 3 tables, to isolate the largest columns (pdf data and thumbnail data) in their own tables.
+    // This avoids having rows that are too large an dimpact performance.
     return this.exec(
       `
         CREATE TABLE IF NOT EXISTS pdf_url (
