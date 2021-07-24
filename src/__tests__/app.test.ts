@@ -8,7 +8,7 @@ const DB_PATH = ':memory:';
 const PORT = 7999;
 
 import setup from '../app';
-import { Thumbnail } from '../models/PdfThumbnails';
+import { PdfThumbnail } from '../models/PdfThumbnails';
 
 describe('app', () => {
   let server: Server | null = null;
@@ -82,7 +82,7 @@ describe('app', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.length).toBe(1);
-        const thumbnail: Thumbnail = res.body[0];
+        const thumbnail: PdfThumbnail = res.body[0];
         expect(thumbnail.url).toBe(url1);
         expect(thumbnail.thumbnail.length).not.toBe(0);
       });
@@ -182,7 +182,7 @@ describe('app', () => {
       .then((res) => {
         expect(res.body.length).toBe(5);
         const expected = [url5, url4, url3, url2, url1];
-        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        const actual = (res.body as PdfThumbnail[]).map((tn) => tn.url);
         expect(actual).toEqual(expected);
       });
 
@@ -197,7 +197,7 @@ describe('app', () => {
       .then((res) => {
         expect(res.body.length).toBe(3);
         const expected = [url5, url4, url3];
-        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        const actual = (res.body as PdfThumbnail[]).map((tn) => tn.url);
         expect(actual).toEqual(expected);
       });
 
@@ -212,7 +212,7 @@ describe('app', () => {
       .then((res) => {
         expect(res.body.length).toBe(2);
         const expected = [url2, url1];
-        const actual = (res.body as Thumbnail[]).map((tn) => tn.url);
+        const actual = (res.body as PdfThumbnail[]).map((tn) => tn.url);
         expect(actual).toEqual(expected);
       });
   });

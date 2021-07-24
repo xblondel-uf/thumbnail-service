@@ -1,16 +1,17 @@
 import path from 'path';
 import sqlite3 from 'sqlite3';
 
-export interface Thumbnail {
+export interface PdfThumbnail {
+  id: number;
   url: string;
+  pdf: string;
   thumbnail: string;
-  created: string;
 }
 
 const SQLITE_CONSTRAINT_ERRNO = 19;
 
 /**
- * Model of the pdf_thumbnails table
+ * Model of the of the storage of pdf and thumbnails.
  */
 export class PdfThumbnails {
   private db: sqlite3.Database;
@@ -33,48 +34,73 @@ export class PdfThumbnails {
   }
 
   /**
-   * Setup the database table if it does not exist.
+   * Setup the database tables if they do not exist.
    *
    * @returns Nothing
    */
   async setup(): Promise<void> {
-    return this.run(
+    return this.exec(
       `
-        CREATE TABLE IF NOT EXISTS pdf_thumbnails (
-            url TEXT NOT NULL PRIMARY KEY,
-            thumbnail TEXT NOT NULL,
-            created DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'now'))
+        CREATE TABLE IF NOT EXISTS pdf (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            url TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX pdf_url_idx ON pdf(url);
+        CREATE TABLE IF NOT EXISTS pdf_data (
+          id INTEGER NOT NULL PRIMARY KEY,
+          pdf TEXT NOT NULL,
+          FOREIGN KEY(id) REFERENCES pdf(id)
+        );
+        CREATE TABLE IF NOT EXISTS thumbnail_data (
+          id INTEGER NOT NULL PRIMARY KEY,
+          thumbnail TEXT NOT NULL,
+          FOREIGN KEY(id) REFERENCES pdf(id)
         );
       `
-    ).then(() =>
-      this.run(
-        `
-      CREATE INDEX pdf_thumbnails_created ON pdf_thumbnails(created);
-      `
-      )
     );
   }
 
   /**
-   * Insert a (url, thumbnail) pair into the database.
+   * Insert a (url, pdf, thumbnail) triplet into the database.
    *
    * @param url - Url to insert
+   * @param pdf - Pdf to insert
    * @param thumbnail - Thumbnail associated to the URL
    * @returns Nothing
    */
-  async insert(url: string, thumbnail: string): Promise<void> {
-    return this.run(
-      `
-            INSERT INTO pdf_thumbnails (url, thumbnail)
-            VALUES(?, ?)
-            `,
-      [url, thumbnail]
-    ).catch((err) => {
-      // we ignore constraint errors (duplicate insertions)
-      if (err.errno !== SQLITE_CONSTRAINT_ERRNO) {
+  async insert(url: string, pdf: string, thumbnail: string): Promise<void> {
+    return this.run('BEGIN TRANSACTION;')
+      .then(async () => {
+        await this.run(
+          `
+          INSERT INTO pdf (url) VALUES (?);
+        `,
+          [url]
+        );
+        await this.run(
+          `
+          INSERT INTO pdf_data (id, pdf) VALUES (LAST_INSERT_ROWID(), ?);
+        `,
+          [pdf]
+        );
+        this.run(
+          `
+          INSERT INTO thumbnail_data (id, thumbnail) VALUES (LAST_INSERT_ROWID(), ?);
+        `,
+          [thumbnail]
+        );
+      })
+      .then(() => this.run('END TRANSACTION;'))
+      .catch(async (err) => {
+        await this.run('ROLLBACK TRANSACTION;');
+
+        // we ignore constraint errors (duplicate insertions)
+        if (err.errno === SQLITE_CONSTRAINT_ERRNO) {
+          return;
+        }
+
         throw err;
-      }
-    });
+      });
   }
 
   /**
@@ -84,16 +110,20 @@ export class PdfThumbnails {
    * @param size - Number of elements to retrieve, all if 0
    * @returns The data stored in the database.
    */
-  async fetch(from: number = 0, size: number = 0): Promise<Thumbnail[]> {
+  async fetch(from: number = 0, size: number = 0): Promise<PdfThumbnail[]> {
     let sql = `
-            SELECT url, thumbnail, created
-            FROM pdf_thumbnails
-            ORDER BY created DESC
+            SELECT pdf.id, url, pdf, thumbnail
+            FROM pdf
+            JOIN pdf_data
+            ON pdf.id = pdf_data.id
+            JOIN thumbnail_data
+            ON pdf.id = thumbnail_data.id
+            ORDER BY pdf.id DESC
         `;
     if (size > 0) {
       sql += `LIMIT ${from}, ${size}`;
     }
-    const rows: Thumbnail[] = await this.all(sql);
+    const rows: PdfThumbnail[] = await this.all(sql);
     return rows;
   }
 
@@ -107,7 +137,7 @@ export class PdfThumbnails {
     const rows = await this.get(
       `
             SELECT 1
-            FROM pdf_thumbnails
+            FROM pdf
             WHERE url = ?
             `,
       [url]
@@ -140,6 +170,7 @@ export class PdfThumbnails {
   // For convenience, they expose a promise interface (even though sqlite3 remains
   // synchronous).
   //
+
   private async get(sql: string, params: any[] = []): Promise<any> {
     return new Promise((resolve, reject) => {
       this.db.get(sql, params, (err, data) => {
@@ -167,6 +198,18 @@ export class PdfThumbnails {
   private async run(sql: string, params: any[] = []): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  private async exec(sql: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.exec(sql, (err) => {
         if (err) {
           reject(err);
         } else {
