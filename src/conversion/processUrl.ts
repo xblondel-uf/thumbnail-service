@@ -18,10 +18,18 @@ export async function processUrl(
       console.debug('Url already exists. Nothing to process.');
       return;
     } else {
+      let pdfContents: string | null = null;
       return fetchPdf(url)
+        .then((contents) => {
+          pdfContents = contents.toString('base64');
+          return contents;
+        })
         .then(getThumbnail)
         .then((thumbnail) => {
-          return db.insert(url, thumbnail);
+          if (pdfContents == null) {
+            throw new Error('Empty pdf contents');
+          }
+          return db.insert(url, pdfContents, thumbnail);
         });
     }
   });

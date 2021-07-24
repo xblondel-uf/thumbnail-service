@@ -102,17 +102,18 @@ The `url` is the one passed as an argument to the original route, `ok` is true i
 
 ### Fetching data
 
-The `/1/pdf/thumbnails` route is a GET route that returns the calculated thumbnails in the following format (as defined in `src/conversion/getThumbnail.ts`):
+The `/1/pdf/thumbnails` route is a GET route that returns the original pdf contents and the calculated thumbnails in the following format (as defined in `src/models/PdfThumbnails.ts`):
 
 ```
-export interface Thumbnail {
+export interface PdfThumbnail {
+  id: number;
   url: string;
+  pdf: string;
   thumbnail: string;
-  created: string;
 }
 ```
 
-The `url` field is the original url, the `thumbnail` field contains the JPEG of the first page of the PDF (in base64 format), and `created` is the upload date. The data is returned with the most recent first.
+The `id` field is a numerical id; the `url` field is the original url; the `pdf` field contains the contents of the original PDF in base64 format; the `thumbnail` field contains the JPEG of the first page of the PDF in base64 format.
 
 Two optional query parameters enable pagination:
 
@@ -135,8 +136,6 @@ $ curl "http://localhost:8000/1/pdf/thumbnails?from=3&size=3"
 - I added JSDoc on most functions and methods when needed. I know that some people may consider them unnecessary, whereas others may consider them absolutely mandatory. It is essentially a convention with pros and cons.
 
 - The application end-to-end tests (`src/__tests__/app.test.ts`) are rather complex: We add two routes to the application on the fly, one to download the PDF and the other exposing the webhook, and we need to coordinate uploads, hook calls and fetching, which complexify the tests.
-
-- The model tests (`src/models/__tests__/PdfThumbnails.test.ts`) make heavy use of a `sleep` function, to avoid having two insertions in the same millisecond, which ensures a strict order when fetching the data (if two urls are in the same millisecond, we may return one or the other first).
 
 - There is no security, and no sanity checks of the various URLs that are received (download and webhook), which is a disputable practice would the API be exposed to the Internet.
 

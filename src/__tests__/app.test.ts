@@ -82,9 +82,10 @@ describe('app', () => {
       .expect(200)
       .then((res) => {
         expect(res.body.length).toBe(1);
-        const thumbnail: PdfThumbnail = res.body[0];
-        expect(thumbnail.url).toBe(url1);
-        expect(thumbnail.thumbnail.length).not.toBe(0);
+        const pdfThumbnail: PdfThumbnail = res.body[0];
+        expect(pdfThumbnail.url).toBe(url1);
+        expect(pdfThumbnail.pdf.length).not.toBe(0);
+        expect(pdfThumbnail.thumbnail.length).not.toBe(0);
       });
   });
 
