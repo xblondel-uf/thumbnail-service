@@ -41,20 +41,20 @@ export class PdfThumbnails {
   async setup(): Promise<void> {
     return this.exec(
       `
-        CREATE TABLE IF NOT EXISTS pdf (
+        CREATE TABLE IF NOT EXISTS pdf_url (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL
         );
-        CREATE UNIQUE INDEX pdf_url_idx ON pdf(url);
+        CREATE UNIQUE INDEX pdf_url_idx ON pdf_url(url);
         CREATE TABLE IF NOT EXISTS pdf_data (
           id INTEGER NOT NULL PRIMARY KEY,
           pdf TEXT NOT NULL,
-          FOREIGN KEY(id) REFERENCES pdf(id)
+          FOREIGN KEY(id) REFERENCES pdf_url(id)
         );
         CREATE TABLE IF NOT EXISTS thumbnail_data (
           id INTEGER NOT NULL PRIMARY KEY,
           thumbnail TEXT NOT NULL,
-          FOREIGN KEY(id) REFERENCES pdf(id)
+          FOREIGN KEY(id) REFERENCES pdf_url(id)
         );
       `
     );
@@ -73,7 +73,7 @@ export class PdfThumbnails {
       .then(async () => {
         await this.run(
           `
-          INSERT INTO pdf (url) VALUES (?);
+          INSERT INTO pdf_url (url) VALUES (?);
         `,
           [url]
         );
@@ -112,13 +112,13 @@ export class PdfThumbnails {
    */
   async fetch(from: number = 0, size: number = 0): Promise<PdfThumbnail[]> {
     let sql = `
-            SELECT pdf.id, url, pdf, thumbnail
-            FROM pdf
+            SELECT pdf_url.id, url, pdf, thumbnail
+            FROM pdf_url
             JOIN pdf_data
-            ON pdf.id = pdf_data.id
+            ON pdf_url.id = pdf_data.id
             JOIN thumbnail_data
-            ON pdf.id = thumbnail_data.id
-            ORDER BY pdf.id DESC
+            ON pdf_url.id = thumbnail_data.id
+            ORDER BY pdf_url.id DESC
         `;
     if (size > 0) {
       sql += `LIMIT ${from}, ${size}`;
@@ -137,7 +137,7 @@ export class PdfThumbnails {
     const rows = await this.get(
       `
             SELECT 1
-            FROM pdf
+            FROM pdf_url
             WHERE url = ?
             `,
       [url]
