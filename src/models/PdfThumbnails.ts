@@ -47,7 +47,7 @@ export class PdfThumbnails {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL
         );
-        CREATE UNIQUE INDEX pdf_url_idx ON pdf_url(url);
+        CREATE UNIQUE INDEX IF NOT EXISTS pdf_url_idx ON pdf_url(url);
         CREATE TABLE IF NOT EXISTS pdf_data (
           id INTEGER NOT NULL PRIMARY KEY,
           pdf TEXT NOT NULL,
